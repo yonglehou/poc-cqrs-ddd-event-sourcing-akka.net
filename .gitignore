@@ -1,0 +1,4 @@
+packages/
+akka.net.poc/obj/
+Api/obj/
+Api/bin/
