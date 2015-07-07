@@ -2,3 +2,8 @@ packages/
 akka.net.poc/obj/
 Api/obj/
 Api/bin/
+akka.net.poc/bin/
+*.pdb
+Worker/bin/
+*.suo
+Worker/obj/

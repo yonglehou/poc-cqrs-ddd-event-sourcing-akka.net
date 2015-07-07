@@ -1,7 +1,6 @@
 ﻿using System;
 using Akka.Actor;
 using Business.Commands;
-using Business.Events;
 
 namespace Business.Actors
 {
@@ -12,55 +11,39 @@ namespace Business.Actors
             Ready();
         }
 
-        
-
         private void Ready()
         {
             Receive<CreateCustomer>(cmd =>
             {
                 var id = Guid.NewGuid();
                 var actorName = string.Format("customer-{0}", id.ToString("N").ToUpper());
-                var actor = Context.ActorOf<CustomerAggregateActor>(actorName);
+                var actor = Context.ActorOf(Props.Create<CustomerAggregateActor>(), actorName);
 
-                if (actor.Ask<bool>(cmd).Result)
-                {
-                    Self.Tell(new CommandExecuted<Guid>
-                    {
-                        CommandId = cmd.CommandId,
-                        Payload = id
-                    });
-                }
-                else
-                {
-                    Self.Tell(new CommandFailed
-                    {
-                        CommandId = cmd.CommandId,
-                        ErrorMessage = "Falhou!"
-                    });
-                }
+                cmd.CustomerId = id;
+
+                //actor.Tell(cmd);
+
+                var response = actor.Ask<Guid>(cmd).Result;
+
+                Sender.Tell(response, Self);
             });
 
             Receive<ChangeCustomerName>(cmd =>
-            {
-                var actorPath = string.Format("customer-{0}", cmd.CustomerId.ToString("N").ToUpper());
-
-                if (Context.ActorSelection(actorPath).Ask<bool>(cmd).Result)
+            {   
+                try
                 {
-                    Self.Tell(new CommandExecuted
-                    {
-                        CommandId = cmd.CommandId
-                    });
+                    var actorPath = string.Format("customer-{0}", cmd.CustomerId.ToString("N").ToUpper());
+                    var actor = Context.ActorSelection(actorPath);
+                    var response = actor.Ask<bool>(cmd).Result;
+                    Sender.Tell(response, Self);
                 }
-                else
+                catch (Exception e)
                 {
-                    Self.Tell(new CommandFailed
-                    {
-                        CommandId = cmd.CommandId,
-                        ErrorMessage = "Falhou!"
-                    });
+                    throw;
                 }
             });
         }
 
     }
 }
+

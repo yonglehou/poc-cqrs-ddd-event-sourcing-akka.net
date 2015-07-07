@@ -64,11 +64,14 @@ namespace Business.Actors
                     CustomerName = cmd.CustomerName
                 };
 
-                PersistAsync(evt, Create);
+                Persist(evt, Create);
 
-                Self.Tell(evt, Sender);
+                Sender.Tell(evt.CustomerId, Self);
+
+                return true;
             } 
-            else if (message is ChangeCustomerName)
+            
+            if (message is ChangeCustomerName)
             {
                 var cmd = (ChangeCustomerName) message;
                 var evt = new CustomerNameChanged
@@ -77,13 +80,14 @@ namespace Business.Actors
                     NewCustomerName = cmd.NewName
                 };
 
-                PersistAsync(evt, ChangeName);
+                Persist(evt, ChangeName);
 
-                Self.Tell(evt, Sender);
+                Sender.Tell(true, Self);
 
                 return true;
             }
-            else if (message is string)
+            
+            if (message is string)
             {
                 var cmd = (string) message;
                 if (cmd == "snapshot")
@@ -109,4 +113,11 @@ namespace Business.Actors
         }
         
     }
+
+    public class CustomerState
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }
+
 }
