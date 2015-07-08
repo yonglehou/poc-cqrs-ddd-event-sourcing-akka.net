@@ -58,6 +58,9 @@ namespace Business.Actors
             if (message is CreateCustomer)
             {
                 var cmd = (CreateCustomer) message;
+                
+                Id = cmd.CustomerId;
+
                 var evt = new CustomerCreated
                 {
                     CustomerId = cmd.CustomerId,

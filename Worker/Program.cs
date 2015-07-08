@@ -21,19 +21,22 @@ namespace Worker
                 ActorSystem actorSystem = ActorSystem.Create("ControlPanel", config);
                 IActorRef commander = actorSystem.ActorOf(Props.Create(() => new CustomerCommanderActor()), ActorPaths.CustomerCommanderActor.Name);
 
-
-                var guid = commander.Ask<Guid>(new CreateCustomer
+                var cmdCreate = new CreateCustomer
                 {
                     CustomerName = "Brasdril"
-                }).Result;
+                };
 
-                Console.WriteLine("Guid Customer Brasdril: "+ guid);
+                var customerId = commander.Ask<Guid>(cmdCreate).Result;
 
-                commander.Ask<bool>(new ChangeCustomerName
+                Console.WriteLine("Guid Customer Brasdril: " + customerId);
+
+                var cmdChangeName = new ChangeCustomerName
                 {
-                    CustomerId = guid,
+                    CustomerId = customerId,
                     NewName = "Brasdril SA"
-                });
+                };
+
+                var nameChanged = commander.Ask<bool>(cmdChangeName).Result;
 
 
             }
@@ -41,6 +44,8 @@ namespace Worker
             {
                 Console.WriteLine(e.Message);
             }
+
+            Console.ReadLine();
         }
     }
 }

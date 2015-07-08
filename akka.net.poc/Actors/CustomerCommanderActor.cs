@@ -20,9 +20,6 @@ namespace Business.Actors
                 var actor = Context.ActorOf(Props.Create<CustomerAggregateActor>(), actorName);
 
                 cmd.CustomerId = id;
-
-                //actor.Tell(cmd);
-
                 var response = actor.Ask<Guid>(cmd).Result;
 
                 Sender.Tell(response, Self);
